@@ -33,7 +33,7 @@ try:
         sys.exit(1)
     
     genai.configure(api_key=API_KEY)
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash-preview-05-20')
     GEMINI_AVAILABLE = True
 except Exception as e:
     GEMINI_AVAILABLE = False
