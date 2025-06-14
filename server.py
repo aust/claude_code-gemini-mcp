@@ -20,14 +20,14 @@ __version__ = "1.0.0"
 try:
     import google.generativeai as genai
     
-    # Get API key from environment or use the one provided during setup
-    API_KEY = os.environ.get("GEMINI_API_KEY", "YOUR_API_KEY_HERE")
-    if API_KEY == "YOUR_API_KEY_HERE":
+    # Get API key from environment
+    API_KEY = os.environ.get("CLAUDE_GEMINI_MCP_API_KEY")
+    if not API_KEY:
         print(json.dumps({
             "jsonrpc": "2.0",
             "error": {
                 "code": -32603,
-                "message": "Please set your Gemini API key in the server.py file or GEMINI_API_KEY environment variable"
+                "message": "Please set your Gemini API key in the CLAUDE_GEMINI_MCP_API_KEY environment variable"
             }
         }), file=sys.stdout, flush=True)
         sys.exit(1)
