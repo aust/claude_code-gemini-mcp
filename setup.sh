@@ -1,12 +1,12 @@
 #!/bin/bash
 # Easy setup script for Claude-Gemini MCP Server
-
 set -e
 
 # Colors for output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}🚀 Claude-Gemini MCP Server Setup${NC}"
@@ -32,6 +32,13 @@ fi
 PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
 echo "✅ Python $PYTHON_VERSION found"
 
+# Check for venv module
+if ! python3 -m venv --help &> /dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  python3-venv not found.${NC}"
+    echo "Install it with: sudo apt install python3-venv python3-full"
+    exit 1
+fi
+
 # Check Claude Code
 if ! command -v claude &> /dev/null; then
     echo -e "${RED}❌ Claude Code CLI not found. Please install it first:${NC}"
@@ -44,6 +51,17 @@ echo "✅ Claude Code CLI found"
 echo ""
 echo "📁 Creating MCP server directory..."
 mkdir -p ~/.claude-mcp-servers/gemini-collab
+
+# Create or use existing virtual environment
+echo "🐍 Setting up Python virtual environment..."
+VENV_PATH="$HOME/.claude-mcp-servers/gemini-collab/venv"
+
+if [ ! -d "$VENV_PATH" ]; then
+    python3 -m venv "$VENV_PATH"
+    echo "✅ Virtual environment created"
+else
+    echo "✅ Using existing virtual environment"
+fi
 
 # Copy server file
 echo "📋 Installing server..."
@@ -75,32 +93,34 @@ echo "export CLAUDE_GEMINI_MCP_API_KEY=\"$API_KEY\"" >> "$PROFILE_FILE"
 
 echo "✅ API key added to $PROFILE_FILE"
 
-# Install Python dependencies
+# Install Python dependencies in virtual environment
 echo ""
-echo "📦 Installing Python dependencies in virtual environment..."
-# Check if we're in a virtual environment
-if [[ "$VIRTUAL_ENV" != "" ]]; then
-    echo "✅ Using virtual environment: $VIRTUAL_ENV"
-    pip install google-generativeai --quiet
-    PYTHON_PATH="$VIRTUAL_ENV/bin/python"
-else
-    echo "⚠️  No virtual environment detected, installing globally..."
-    pip3 install google-generativeai --quiet
-    PYTHON_PATH="python3"
-fi
+echo "📦 Installing Python dependencies..."
+
+# Always use the venv Python (regardless of whether user activated it)
+PYTHON_PATH="$VENV_PATH/bin/python3"
+
+# Upgrade pip and install dependencies
+"$PYTHON_PATH" -m pip install --upgrade pip --quiet
+"$PYTHON_PATH" -m pip install google-generativeai --quiet
+
+echo "✅ Dependencies installed in virtual environment"
 
 # Remove any existing MCP configuration
 echo ""
 echo "🔧 Configuring Claude Code..."
 claude mcp remove gemini-collab 2>/dev/null || true
 
-# Add MCP server with proper Python path
+# Add MCP server with venv Python path
 claude mcp add --scope user gemini-collab "$PYTHON_PATH" ~/.claude-mcp-servers/gemini-collab/server.py
 
 echo ""
 echo -e "${GREEN}✅ Setup complete!${NC}"
 echo ""
 echo "🎉 You can now use Gemini in Claude Code from any directory!"
+echo ""
+echo -e "${YELLOW}⚠️  IMPORTANT: Reload your shell to activate the API key:${NC}"
+echo "  source $PROFILE_FILE"
 echo ""
 echo "Try it out:"
 echo "  1. Run: claude"
