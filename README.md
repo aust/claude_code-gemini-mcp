@@ -12,14 +12,14 @@ Connect Claude Code with Google's Gemini AI for powerful AI collaboration. Ask G
 ### One-Line Install
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/RaiAnsar/claude_code-gemini-mcp/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/aust/claude_code-gemini-mcp/main/install.sh | bash
 ```
 
 ### Manual Install
 
 1. **Clone this repo:**
 ```bash
-git clone https://github.com/RaiAnsar/claude_code-gemini-mcp.git
+git clone https://github.com/aust/claude_code-gemini-mcp.git
 cd claude_code-gemini-mcp
 ```
 
